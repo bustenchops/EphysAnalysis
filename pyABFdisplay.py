@@ -22,15 +22,10 @@ def showheader():
     print(abf)
 
 def plotall():
-    i = 0
-    j = 0
-    k = 0
-    tosweeps = input('How many sweeps in the file?')
-    tosweepsint = int(tosweeps)
     fig = plt.figure(figsize=(10, 8))
-    plt.title("All Sweeps in File")
+    fig.suptitle('All Sweeps in File')
     abf.setSweep(sweepNumber=1, channel=0)
-    ax = fig.add_subplot(12, 1, (1, 4))
+    ax = fig.add_subplot(12, 1, (1, 5))
     ax.set_xlabel(abf.sweepLabelX)
     ax.set_ylabel(abf.sweepLabelY)
     abf.setSweep(sweepNumber=1, channel=1)
@@ -38,21 +33,16 @@ def plotall():
     bx.set_xlabel(abf.sweepLabelX)
     bx.set_ylabel(abf.sweepLabelY)
     abf.setSweep(sweepNumber=1, channel=2)
-    cx = fig.add_subplot(12, 1, 12)
+    cx = fig.add_subplot(12, 1, (11,12))
     cx.set_xlabel(abf.sweepLabelX)
     cx.set_ylabel(abf.sweepLabelY)
-    while i < tosweepsint:
-        abf.setSweep(sweepNumber=i, channel=0)
+    for sweepNumber in abf.sweepList:
+        abf.setSweep(sweepNumber, channel=0)
         ax.plot(abf.sweepX, abf.sweepY, alpha=.5)
-        i += 1
-    while j < tosweepsint:
-        abf.setSweep(sweepNumber=j, channel=1)
+        abf.setSweep(sweepNumber, channel=1)
         bx.plot(abf.sweepX, abf.sweepY, alpha=.5)
-        j += 1
-    while k < tosweepsint:
-        abf.setSweep(sweepNumber=k, channel=2)
+        abf.setSweep(sweepNumber, channel=2)
         cx.plot(abf.sweepX, abf.sweepY, alpha=.5)
-        k += 1
     plt.legend()
     plt.show()
 
