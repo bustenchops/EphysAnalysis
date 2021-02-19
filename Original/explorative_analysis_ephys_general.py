@@ -1,4 +1,4 @@
-from ephys_class import EphysClass
+from Original.ephys_class import EphysClass
 import os
 import re
 
