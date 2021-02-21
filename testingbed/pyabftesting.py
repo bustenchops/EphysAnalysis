@@ -4,22 +4,24 @@ import numpy as np
 import re
 
 abf = pyabf.ABF("/home/pi/ephys/2021-02-16/2021_02_16_0009.abf")
+abf.setSweep(sweepNumber=1, channel=1)
 # abf = pyabf.ABF("/home/2021_02_10_0003.abf")
 # print(abf.headerText) # display header information in the console
-# abf.headerLaunch() # display header information in a web browser
-si = abf.headerText
-print(si)
-finditall = re.findall(r"dataSecPerPoint = \S+", si)
-sss = finditall[0]
-print(sss)
-# print(finditall)
-split = re.split(r'\s',sss)
-sampleinterval = split[2]
-npversion = float(sampleinterval)
-
-print(npversion)
-kirk = npversion * 10
-print(kirk)
+abf.headerLaunch() # display header information in a web browser
+#         si = abf.headerText
+print(abf.sweepLengthSec)
+#         print(si)
+#         finditall = re.findall(r"dataSecPerPoint = \S+", si)
+#         sss = finditall[0]
+#         print(sss)
+#         # print(finditall)
+#         split = re.split(r'\s',sss)
+#         sampleinterval = split[2]
+#         npversion = float(sampleinterval)
+#
+#         print(npversion)
+#         kirk = npversion * 10
+#         print(kirk)
 #
 #
 # xvariablesweep = np.array(abf.sweepX)

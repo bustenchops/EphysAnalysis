@@ -7,7 +7,7 @@ from pathlib import Path
 
 class EphysClass:
     def __init__(self):
-        #loadfiles variables (first initialized)
+        #loadfiles variables list (first initialized)
         self.homefolder = None          # input directory of ephys subfolders
         self.experdate = None           # input subfolder of ephys files to analyze
         self.fileloc = None             # joined directory homefolder + experdate
@@ -16,11 +16,33 @@ class EphysClass:
         self.abffiletoimport = None     # input the 4 digit file number to select file
         self.foundfile = None           # sting of the abf file name located from the search
         self.fullfilepath = None        # joined full path to the desired file fileloc + foundfile
-        #showoptions variable (first initialized)
+        self.abf = None                 #instance of pyabf.ABF
+        #showoptions variable list (first initialized)
         self.selection = None           # input selection for analysis
+        self.dict = None                # dictionary map for selection of analysis
+        #showheader variable list (first initialized)
+        #showheaderfull variable list (first initialized)
+        #plotall variable list (first initialized)
+        self.fig = None                 # intance of plt.figure
+        self.ax = None                  # fig subplot 1
+        self.bx = None                  # fig subplot 2
+        self.cx = None                  # fig subplot 3
+        #plotselected variable list (first intialized)
+        self.numsweep = None            # input indicate number of sweeps to analyze
+        self.sweeparray = None          # initialize array with size indicated by numsweep
+        #threedee variable list (first initialized)
+        self.i1 = None                  # initialize the plot array for 3d
+        self.i2 = None                  # initialize the plot array for 3d calc the
+        self.dataX = None               # used to set offset for the 3d plots
+        self.dataY = None               # used to set offset for the 3d plots
+        #sumandsave variable list (first initialized)
+        self.filename = None            # used to convert filename so it can be use to save the image
+        self.filename_replace = None    # used to replace abf extension with jpg for fig saving
+
+
     def loadfiles(self):
         print('IMPORTING DIRECTORIES')
-        self.homefolder = input('Are the files in the folder /home/pi/ephys/ (y or n)?')
+        self.homefolder = input('Are the files in the folder /home/pi/ephys/ (y or n)? ')
         if self.homefolder == 'y':
             self.homefolder = '/home/pi/ephys/'
         else:
@@ -51,139 +73,126 @@ class EphysClass:
         self.fullfilepath = os.path.join(self.fileloc, self.foundfile)
         print('Full file path: ', self.fullfilepath)
         self.abf = pyabf.ABF(self.fullfilepath)
-        showoptions()
+        self.showoptions()
 
     def showoptions(self):
-        self.selection = input('1. Show file info: 2. Plot all sweeps: 3. Plot select sweeps: 4. Plot all sweeps in 3D: 5. Take all in 3d and save')
-        if self.selection == '1':
-            showheader()
-            showoptions()
-        elif selection == '2':
-               plotall()
-        elif selection == '3':
-             plotselected()
-        elif selection == '4':
-            threedee()
-        elif selection == '5':
-            sumandsave()
+        print('1. Show file info')
+        print('2. Show header in web browser')
+        print('3. Plot all sweeps')
+        print('4. Plot select sweeps')
+        print('5. Plot all sweeps in 3D')
+        print('6. Take all files, plot in 3d and save')
+        self.selection = int(input('Enter selection: '))
+        if self.selection <= 6:
+            self.dict = {
+                1: self.showheader,
+                2: self.showheaderfull,
+                3: self.plotall,
+                4: self.plotselected,
+                5: self.threedee,
+                6: self.sumandsave,
+            }
+            self.dict.get(self.selection)()
         else:
             print('invalid selection try again')
-            showoptions()
+            self.showoptions()
 
+    def showheader(self):
+        print()
+        print('File info START:')
+        print(self.abf)
+        print(':File info END')
+        print()
+        self.showoptions()
 
-    def showheader():
-        print(abf)
+    def showheaderfull(self):
+        self.abf.headerLaunch()
 
-
-    def plotall():
-        fig = plt.figure(figsize=(10, 8))
-        fig.suptitle('All Sweeps in File')
-        abf.setSweep(sweepNumber=1, channel=0)
-        ax = fig.add_subplot(12, 1, (1, 8))
+    def plotall(self):
+        self.fig = plt.figure(figsize=(10, 8))
+        self.fig.suptitle('All Sweeps in File')
+        self.abf.setSweep(sweepNumber=1, channel=0)
+        self.ax = self.fig.add_subplot(12, 1, (1, 8))
         # ax.set_xlabel(abf.sweepLabelX)
-        ax.set_ylabel(abf.sweepLabelY)
-        abf.setSweep(sweepNumber=1, channel=1)
-        bx = fig.add_subplot(12, 1, (9, 10))
+        self.ax.set_ylabel(self.abf.sweepLabelY)
+        self.abf.setSweep(sweepNumber=1, channel=1)
+        self.bx = self.fig.add_subplot(12, 1, (9, 10))
         # bx.set_xlabel(abf.sweepLabelX)
-        bx.set_ylabel(abf.sweepLabelY)
-        abf.setSweep(sweepNumber=1, channel=2)
-        cx = fig.add_subplot(12, 1, (11, 12))
-        cx.set_xlabel(abf.sweepLabelX)
-        cx.set_ylabel(abf.sweepLabelY)
-        for sweepnum in abf.sweepList:
-            abf.setSweep(sweepnum, channel=0)
-            ax.plot(abf.sweepX, abf.sweepY, alpha=.5)
-        abf.setSweep(0, channel=1)
-        bx.plot(abf.sweepX, abf.sweepC, alpha=.5)
-        abf.setSweep(0, channel=2)
-        cx.plot(abf.sweepX, abf.sweepY, alpha=.5)
+        self.bx.set_ylabel(self.abf.sweepLabelY)
+        self.abf.setSweep(sweepNumber=1, channel=2)
+        self.cx = self.fig.add_subplot(12, 1, (11, 12))
+        self.cx.set_xlabel(self.abf.sweepLabelX)
+        self.cx.set_ylabel(self.abf.sweepLabelY)
+        for sweepnum in self.abf.sweepList:
+            self.abf.setSweep(sweepnum, channel=0)
+            self.ax.plot(self.abf.sweepX, self.abf.sweepY, alpha=.5)
+        self.abf.setSweep(0, channel=1)
+        self.bx.plot(self.abf.sweepX, self.abf.sweepC, alpha=.5)
+        self.abf.setSweep(0, channel=2)
+        self.cx.plot(self.abf.sweepX, self.abf.sweepY, alpha=.5)
         plt.show()
 
-
-    def plotselected():
-        numsweep = int(input('How many sweeps to plot?'))
-        sweeparray = np.zeros(numsweep, dtype=int)
-        for x in range(numsweep):
-            sweeparray[x] = int(input('Sweep no:'))
-        fig = plt.figure(figsize=(10, 8))
-        fig.suptitle('Selected Sweeps from File')
-        abf.setSweep(sweepNumber=1, channel=0)
-        ax = fig.add_subplot(12, 1, (1, 8))
+    def plotselected(self):
+        self.numsweep = int(input('How many sweeps to plot?'))
+        self.sweeparray = np.zeros(self.numsweep, dtype=int)
+        for x in range(self.numsweep):
+            self.sweeparray[x] = int(input('Sweep no:'))
+        self.fig = plt.figure(figsize=(10, 8))
+        self.fig.suptitle('Selected Sweeps from File')
+        self.abf.setSweep(sweepNumber=1, channel=0)
+        self.ax = self.fig.add_subplot(12, 1, (1, 8))
         # ax.set_xlabel(abf.sweepLabelX)
-        ax.set_ylabel(abf.sweepLabelY)
-        abf.setSweep(sweepNumber=1, channel=1)
-        bx = fig.add_subplot(12, 1, (9, 10))
+        self.ax.set_ylabel(self.abf.sweepLabelY)
+        self.abf.setSweep(sweepNumber=1, channel=1)
+        self.bx = self.fig.add_subplot(12, 1, (9, 10))
         # bx.set_xlabel(abf.sweepLabelX)
-        bx.set_ylabel(abf.sweepLabelY)
-        abf.setSweep(sweepNumber=1, channel=2)
-        cx = fig.add_subplot(12, 1, (11, 12))
-        cx.set_xlabel(abf.sweepLabelX)
-        cx.set_ylabel(abf.sweepLabelY)
-        for sweepnum in sweeparray:
-            abf.setSweep(sweepnum, channel=0)
-            ax.plot(abf.sweepX, abf.sweepY, alpha=.5, label="Sweep %d" % sweepnum)
-        abf.setSweep(0, channel=1)
-        bx.plot(abf.sweepX, abf.sweepC, alpha=.5)
-        abf.setSweep(0, channel=2)
-        cx.plot(abf.sweepX, abf.sweepY, alpha=.5)
-        ax.legend()
+        self.bx.set_ylabel(self.abf.sweepLabelY)
+        self.abf.setSweep(sweepNumber=1, channel=2)
+        self.cx = self.fig.add_subplot(12, 1, (11, 12))
+        self.cx.set_xlabel(self.abf.sweepLabelX)
+        self.cx.set_ylabel(self.abf.sweepLabelY)
+        for sweepnum in self.sweeparray:
+            self.abf.setSweep(sweepnum, channel=0)
+            self.ax.plot(self.abf.sweepX, self.abf.sweepY, alpha=.5, label="Sweep %d" % sweepnum)
+        self.abf.setSweep(0, channel=1)
+        self.bx.plot(self.abf.sweepX, self.abf.sweepC, alpha=.5)
+        self.abf.setSweep(0, channel=2)
+        self.cx.plot(self.abf.sweepX, self.abf.sweepY, alpha=.5)
+        self.ax.legend()
         plt.show()
 
-
-    def threedee():
-        fig = plt.figure(figsize=(10, 5))
-        fig.suptitle('All Sweeps in File')
-        abf.setSweep(sweepNumber=1, channel=0)
-        ax = fig.add_subplot(1, 1, 1)
-        ax.axis('Off')
-        for sweepnum in abf.sweepList:
-            abf.setSweep(sweepnum, channel=0)
-            i1, i2 = 0, int(abf.dataRate * 1.5)
-            dataX = abf.sweepX[i1:i2] + .025 * sweepnum
-            dataY = abf.sweepY[i1:i2] + 10 * sweepnum
-            ax.plot(dataX, dataY, alpha=.5)
+    def threedee(self):
+        self.fig = plt.figure(figsize=(10, 5))
+        self.fig.suptitle('All Sweeps in File')
+        self.abf.setSweep(sweepNumber=1, channel=0)
+        self.ax = self.fig.add_subplot(1, 1, 1)
+        self.ax.axis('Off')
+        for sweepnum in self.abf.sweepList:
+            self.abf.setSweep(sweepnum, channel=0)
+            self.i1, self.i2 = 0, int(self.abf.dataRate * self.abf.sweepLengthSec)
+            self.dataX = self.abf.sweepX[self.i1:self.i2] + .025 * sweepnum
+            self.dataY = self.abf.sweepY[self.i1:self.i2] + 10 * sweepnum
+            self.ax.plot(self.dataX, self.dataY, alpha=.5)
         plt.show()
 
-
-    def sumandsave():
-        for abflist in abffiles:
-            foundfile = ''.join(abflist)
-            print(foundfile)
-            fullfilepath = os.path.join(fileloc, foundfile)
-            abf = pyabf.ABF(fullfilepath)
-            filename = Path(fullfilepath)
-            filename_replace = filename.with_suffix('.jpg')
-            print(filename)
-            fig = plt.figure(figsize=(10, 5))
-            fig.suptitle(abflist)
-            abf.setSweep(sweepNumber=1, channel=0)
-            ax = fig.add_subplot(1, 1, 1)
-            ax.axis('Off')
-            for sweepnum in abf.sweepList:
-                abf.setSweep(sweepnum, channel=0)
-                i1, i2 = 0, int(abf.dataRate * 1.5)
-                dataX = abf.sweepX[i1:i2] + .025 * sweepnum
-                dataY = abf.sweepY[i1:i2] + 10 * sweepnum
-                ax.plot(dataX, dataY, alpha=.5)
-            fig.savefig(filename_replace)
-
-
-    print('IMPORTING DIRECTORIES')
-    homefolder = input('Are the files in the folder /home/pi/ephys/ (y or n)?')
-    if homefolder == 'y':
-        homefolder = '/home/pi/ephys/'
-    else:
-        homefolder = input('enter the datapath in /folder/subfolder/ format:')
-        print('Experiments should be stored in subfolder by date in yyyy-mm-dd format.')
-    experdate = input('Enter the experiment date in yyyy-mm-dd format ')
-    print('Subfolders within home folder:')
-    print(os.listdir(homefolder))
-    fileloc = os.path.join(homefolder, experdate)
-    if os.path.exists(fileloc):
-        print('Files within experiment date folder')
-        print(os.listdir(os.path.join(homefolder, experdate)))
-        fileloclist = os.listdir(os.path.join(homefolder, experdate))
-    else:
-        print('The file does not exist, check the path and date.')
-
-
+    def sumandsave(self):
+        for abflist in self.abffiles:
+            self.foundfile = ''.join(abflist)
+            print(self.foundfile)
+            self.fullfilepath = os.path.join(self.fileloc, self.foundfile)
+            self.abf = pyabf.ABF(self.fullfilepath)
+            self.filename = Path(self.fullfilepath)
+            self.filename_replace = self.filename.with_suffix('.jpg')
+            print(self.filename)
+            self.fig = plt.figure(figsize=(10, 5))
+            self.fig.suptitle(abflist)
+            self.abf.setSweep(sweepNumber=1, channel=0)
+            self.ax = self.fig.add_subplot(1, 1, 1)
+            self.ax.axis('Off')
+            for sweepnum in self.abf.sweepList:
+                self.abf.setSweep(sweepnum, channel=0)
+                self.i1, self.i2 = 0, int(self.abf.dataRate * self.abf.sweepLengthSec)
+                self.dataX = self.abf.sweepX[self.i1:self.i2] + .025 * sweepnum
+                self.dataY = self.abf.sweepY[self.i1:self.i2] + 10 * sweepnum
+                self.ax.plot(self.dataX, self.dataY, alpha=.5)
+            self.fig.savefig(self.filename_replace)
