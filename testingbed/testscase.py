@@ -6,30 +6,47 @@ import numpy as np
 from pathlib import Path
 
 
-def showoptions():
-    selection = input('1. Show file info: 2. Plot all sweeps: 3. Plot select sweeps: 4. Plot all sweeps in 3D: 5. Take all in 3d and save')
-    if selection == '1':
-        showheader()
-        showoptions()
-    else:
-        if selection == '2':
-            plotall()
-        else:
-            if selection == '3':
-                plotselected()
-            else:
-                if selection == '4':
-                    threedee()
-                else:
-                    if selection == '5':
-                        sumandsave()
-                    else:
-                        print('invalid selection try again')
-                        showoptions()
 
+def showoptions():
+    selection = int(input('1. Show file info: 2. Plot all sweeps: 3. Plot select sweeps: 4. Plot all sweeps in 3D: 5. Take all in 3d and save'))
+    # if selection == '1':
+    #     showheader()
+    #     showoptions()
+    # else:
+    #     if selection == '2':
+    #         plotall()
+    #     else:
+    #         if selection == '3':
+    #             plotselected()
+    #         else:
+    #             if selection == '4':
+    #                 threedee()
+    #             else:
+    #                 if selection == '5':
+    #                     sumandsave()
+    #                 else:
+    #                     print('invalid selection try again')
+    #                     showoptions()
+    if selection <= 5:
+        dict = {
+            1 : showheader,
+            2 : plotall,
+            3 : plotselected,
+            4 : threedee,
+            5 : sumandsave,
+            }
+        dict.get(selection)()
+    else:
+        print('invalid selection try again')
+        showoptions()
 
 def showheader():
+    print()
+    print('File info START:')
     print(abf)
+    print(':File info END')
+    print()
+    showoptions()
 
 
 def plotall():
