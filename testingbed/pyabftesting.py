@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import re
 
-abf = pyabf.ABF("/home/pi/ephys/2021-02-16/2021_02_16_0009.abf")
+# abf = pyabf.ABF("/home/pi/ephys/2021-02-16/2021_02_16_0009.abf")
 abf.setSweep(sweepNumber=1, channel=1)
-# abf = pyabf.ABF("/home/2021_02_10_0003.abf")
+abf = pyabf.ABF("/home/2021_02_10_0003.abf")
 # print(abf.headerText) # display header information in the console
 abf.headerLaunch() # display header information in a web browser
 #         si = abf.headerText

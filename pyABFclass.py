@@ -20,8 +20,12 @@ class EphysClass:
         #showoptions variable list (first initialized)
         self.selection = None           # input selection for analysis
         self.dict = None                # dictionary map for selection of analysis
+        #neworrepeat variable list (first initialized)
+        self.choices = None             # input selection for repeating or new file
+        self.dictch = None              # dictionary map for selection
         #showheader variable list (first initialized)
         #showheaderfull variable list (first initialized)
+        self.numchan = None             # used to store number of channels
         #plotall variable list (first initialized)
         self.fig = None                 # intance of plt.figure
         self.ax = None                  # fig subplot 1
@@ -95,7 +99,19 @@ class EphysClass:
             self.dict.get(self.selection)()
         else:
             print('invalid selection try again')
-            self.showoptions()
+            self.neworpeat()
+
+    def neworpeat(self):
+        self.choices = int(input('1: rehash same file 2: new file'))
+        if self.choices <= 6:
+            self.dictch = {
+                1: self.showoptions,
+                2: self.loadfiles,
+            }
+            self.dictch.get(self.choices)()
+        else:
+            print('invalid selection try again')
+            self.neworpeat()
 
     def showheader(self):
         print()
@@ -103,23 +119,28 @@ class EphysClass:
         print(self.abf)
         print(':File info END')
         print()
-        self.showoptions()
+        self.neworpeat()
 
     def showheaderfull(self):
-        self.abf.headerLaunch()
+        self.numchan = self.abf.channelCount
+        print('Opening full header for each channel present')
+        for thechan in range(self.numchan):
+            self.abf.setSweep(sweepNumber=0, channel=thechan)
+            self.abf.headerLaunch()
+        self.neworpeat()
 
     def plotall(self):
         self.fig = plt.figure(figsize=(10, 8))
         self.fig.suptitle('All Sweeps in File')
-        self.abf.setSweep(sweepNumber=1, channel=0)
+        self.abf.setSweep(sweepNumber=0, channel=0)
         self.ax = self.fig.add_subplot(12, 1, (1, 8))
         # ax.set_xlabel(abf.sweepLabelX)
         self.ax.set_ylabel(self.abf.sweepLabelY)
-        self.abf.setSweep(sweepNumber=1, channel=1)
+        self.abf.setSweep(sweepNumber=0, channel=1)
         self.bx = self.fig.add_subplot(12, 1, (9, 10))
         # bx.set_xlabel(abf.sweepLabelX)
         self.bx.set_ylabel(self.abf.sweepLabelY)
-        self.abf.setSweep(sweepNumber=1, channel=2)
+        self.abf.setSweep(sweepNumber=0, channel=2)
         self.cx = self.fig.add_subplot(12, 1, (11, 12))
         self.cx.set_xlabel(self.abf.sweepLabelX)
         self.cx.set_ylabel(self.abf.sweepLabelY)
@@ -131,6 +152,7 @@ class EphysClass:
         self.abf.setSweep(0, channel=2)
         self.cx.plot(self.abf.sweepX, self.abf.sweepY, alpha=.5)
         plt.show()
+        self.neworpeat()
 
     def plotselected(self):
         self.numsweep = int(input('How many sweeps to plot?'))
@@ -160,11 +182,12 @@ class EphysClass:
         self.cx.plot(self.abf.sweepX, self.abf.sweepY, alpha=.5)
         self.ax.legend()
         plt.show()
+        self.neworpeat()
 
     def threedee(self):
         self.fig = plt.figure(figsize=(10, 5))
         self.fig.suptitle('All Sweeps in File')
-        self.abf.setSweep(sweepNumber=1, channel=0)
+        self.abf.setSweep(sweepNumber=0, channel=0)
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.axis('Off')
         for sweepnum in self.abf.sweepList:
@@ -174,6 +197,7 @@ class EphysClass:
             self.dataY = self.abf.sweepY[self.i1:self.i2] + 10 * sweepnum
             self.ax.plot(self.dataX, self.dataY, alpha=.5)
         plt.show()
+        self.neworpeat()
 
     def sumandsave(self):
         for abflist in self.abffiles:
@@ -186,13 +210,15 @@ class EphysClass:
             print(self.filename)
             self.fig = plt.figure(figsize=(10, 5))
             self.fig.suptitle(abflist)
-            self.abf.setSweep(sweepNumber=1, channel=0)
+            self.abf.setSweep(sweepNumber=0, channel=0)
             self.ax = self.fig.add_subplot(1, 1, 1)
             self.ax.axis('Off')
             for sweepnum in self.abf.sweepList:
                 self.abf.setSweep(sweepnum, channel=0)
                 self.i1, self.i2 = 0, int(self.abf.dataRate * self.abf.sweepLengthSec)
                 self.dataX = self.abf.sweepX[self.i1:self.i2] + .025 * sweepnum
-                self.dataY = self.abf.sweepY[self.i1:self.i2] + 10 * sweepnum
+                self.dataY = self.abf.sweepY[self.i1:self.i2] + 15 * sweepnum
                 self.ax.plot(self.dataX, self.dataY, alpha=.5)
             self.fig.savefig(self.filename_replace)
+            plt.close()
+            self.neworpeat()
