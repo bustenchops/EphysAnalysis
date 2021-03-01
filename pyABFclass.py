@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 
+#This has all the working bits
+
 class EphysClass:
     def __init__(self):
         #loadfiles variables list (first initialized)
