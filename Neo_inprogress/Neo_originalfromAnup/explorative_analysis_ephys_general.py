@@ -1,4 +1,4 @@
-from Original.ephys_class import EphysClass
+from Neo_inprogress.Neo_originalfromAnup.ephys_class import EphysClass
 import os
 import re
 
