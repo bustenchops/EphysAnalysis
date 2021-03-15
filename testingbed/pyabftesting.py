@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import re
 
-# abf = pyabf.ABF("/home/pi/ephys/2021-02-16/2021_02_16_0009.abf")
+abf = pyabf.ABF("/home/pi/ephys/2021-02-16/2021_02_16_0009.abf")
 # abf.setSweep(sweepNumber=1, channel=1)
-abf = pyabf.ABF("/home/2021-02-10/2021_02_10_0003.abf")
+# abf = pyabf.ABF("/home/2021-02-10/2021_02_10_0003.abf")
 # print(abf.headerText) # display header information in the console
 # abf.headerLaunch() # display header information in a web browser
 #         si = abf.headerText
@@ -25,7 +25,9 @@ abf = pyabf.ABF("/home/2021-02-10/2021_02_10_0003.abf")
 #
 #
 arf = 0
-abf.setSweep(sweepNumber=arf, channel=2)
+abf.setSweep(sweepNumber=arf, channel=0)
+test = abf.sweepCount
+print(test)
 xvariablesweep = np.array(abf.sweepX)
 yvariablesweep = np.array(abf.sweepY)
 plt.figure(figsize=(8, 5))
