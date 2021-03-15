@@ -2,8 +2,6 @@ import pyabf
 import re
 import os
 import matplotlib.pyplot as plt
-import numpy as np
-from pathlib import Path
 import ipywidgets as widgets
 from ipywidgets import interact, interactive, fixed, interact_manual
 
@@ -25,17 +23,6 @@ class EphysClass:
         self.numsweep = None               # number of sweeps
         self.abffiletoimport = None     # input the 4 digit file number to select file
         self.foundfile = None           # sting of the abf file name located from the search
-
-
-        #showoptions variable list (first initialized)
-        self.selection = None           # input selection for analysis
-        self.dict = None                # dictionary map for selection of analysis
-        #neworrepeat variable list (first initialized)
-        self.choices = None             # input selection for repeating or new file
-        self.dictch = None              # dictionary map for selection
-        #showheader variable list (first initialized)
-        #showheaderfull variable list (first initialized)
-        self.numchan = None             # used to store number of channels
         #plotall variable list (first initialized)
         self.fig = None                 # intance of plt.figure
         self.ax = None                  # fig subplot 1
@@ -43,15 +30,7 @@ class EphysClass:
         self.cx = None                  # fig subplot 3
         #plotselected variable list (first intialized)
         self.numsweep = None            # input indicate number of sweeps to analyze
-        self.sweeparray = None          # initialize array with size indicated by numsweep
-        #threedee variable list (first initialized)
-        self.i1 = None                  # initialize the plot array for 3d
-        self.i2 = None                  # initialize the plot array for 3d calc the
-        self.dataX = None               # used to set offset for the 3d plots
-        self.dataY = None               # used to set offset for the 3d plots
-        #sumandsave variable list (first initialized)
-        self.filename = None            # used to convert filename so it can be use to save the image
-        self.filename_replace = None    # used to replace abf extension with jpg for fig saving
+
 
 
     def loadfiles(self):
@@ -77,14 +56,14 @@ class EphysClass:
         self.abffiles.sort()
         print('*.abf files in folder:')
         print(self.abffiles)
-        self.ddfile = interact(setfile, dropdownfile=widgets.Dropdown(option=self.abffiles, description='File:'),)
+        self.ddfile = interact(self.setthefile, dropdownfile=widgets.Dropdown(option=self.abffiles, description='File:'),)
 
-    def setfile(self, dropdownfile):
+    def setthefile(self, dropdownfile):
         self.fullfilepath = os.path.join(self.fileloc, dropdownfile)
         self.currentfile = dropdownfile
         self.abf = pyabf.ABF(self.fullfilepath)
         self.numsweep = self.abf.sweepCount() - 1
-        self.slidsweep = interact(setsweep, sweeppick=widgets.IntSlider(
+        self.slidsweep = interact(self.setsweep, sweeppick=widgets.IntSlider(
             min=0,
             max=self.numsweep,
             values=1,
