@@ -1,0 +1,1 @@
+jupyter lab --ServerApp.root_dir E:\Programs\PycharmCode
